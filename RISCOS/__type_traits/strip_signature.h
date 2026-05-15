@@ -1,0 +1,1 @@
+../../include/__type_traits/strip_signature.h

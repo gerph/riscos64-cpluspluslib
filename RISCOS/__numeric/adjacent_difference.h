@@ -1,0 +1,1 @@
+../../include/__numeric/adjacent_difference.h

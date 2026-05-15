@@ -1,0 +1,73 @@
+#!/usr/bin/env riscos-amu -f
+# Makefile for libc++ on RISC OS.
+#
+
+COMPONENT  = c++
+
+# This port is intended for the 64-bit GCC-based C++ toolchain.
+BUILD64    = 1
+
+# Export headers into <Exports$Dir>.Lib.c++.h and the library into
+# <Exports$Dir>.Lib.c++.o.
+LIBCOMPONENT = c++
+EXPORTHDRS   = ${EXP_LIB}.${LIBCOMPONENT}.h.__config
+
+PREINCLUDES =
+INCLUDES   =
+CDEFINES   = -D_LIBCPP_BUILDING_LIBRARY \
+             -D'__has_feature(x)=0' \
+             -D'__has_extension(x)=0' \
+             -std=gnu++23 \
+             -nostdinc++ \
+             -I../include \
+             -I../src/include \
+             -I../src
+
+OBJS       = o.algorithm \
+             o.any \
+             o.atomic \
+             o.barrier \
+             o.bind \
+             o.charconv \
+             o.chrono \
+             o.condition_variable \
+             o.condition_variable_destructor \
+             o.exception \
+             o.functional \
+             o.future \
+             o.hash \
+             o.legacy_pointer_safety \
+             o.memory \
+             o.memory_resource \
+             o.mutex \
+             o.mutex_destructor \
+             o.new_handler \
+             o.new_helpers \
+             o.new \
+             o.optional \
+             o.print \
+             o.random_shuffle \
+             o.ryu_d2fixed \
+             o.ryu_d2s \
+             o.ryu_f2s \
+             o.shared_mutex \
+             o.stdexcept \
+             o.string \
+             o.system_error \
+             o.thread \
+             o.typeinfo \
+             o.valarray \
+             o.variant \
+             o.vector \
+             o.verbose_abort
+
+include LibExport
+
+${EXP_LIB}.${LIBCOMPONENT}.h.__config: ^.include.__config
+        rm -rf ${EXP_LIB_NATIVE}/${LIBCOMPONENT}/h
+        mkdir -p ${EXP_LIB_NATIVE}/${LIBCOMPONENT}
+        cp -a ../include ${EXP_LIB_NATIVE}/${LIBCOMPONENT}/h
+        cp __config_site ${EXP_LIB_NATIVE}/${LIBCOMPONENT}/h/__config_site
+
+#---------------------------------------------------------------------------
+# Dynamic dependencies:
