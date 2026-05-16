@@ -20,6 +20,8 @@ CDEFINES   = -D_LIBCPP_BUILDING_LIBRARY \
              -D'__has_feature(x)=0' \
              -D'__has_extension(x)=0' \
              -std=gnu++23 \
+             -fno-exceptions \
+             -fno-rtti \
              -nostdinc++ \
              -I../include \
              -I../src/include \

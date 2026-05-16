@@ -37,10 +37,10 @@ the parallel STL backend.
 
 ## Tests
 
-A small header and runtime smoke test is provided in `tests/header-basics`. It
-builds a 64-bit absolute using `-nostdinc++` and `-isystem C:c++`, so it checks
-that the exported libc++ headers are usable through the RISC OS include path and
-that the resulting program can link against `C:c++.o.libc++-64`.
+Small 64-bit smoke tests are provided below `tests`. They build absolutes using
+`-nostdinc++` and `-isystem C:c++`, so they check that the exported libc++
+headers are usable through the RISC OS include path and that the resulting
+programs can link against `C:c++.o.libc++-64`.
 
 Build the library exports first:
 
@@ -48,7 +48,7 @@ Build the library exports first:
 riscos-amu export
 ```
 
-Then build and run the test:
+Then build and run the header-only test:
 
 ```sh
 cd tests/header-basics
@@ -60,4 +60,20 @@ The expected output is:
 
 ```text
 libc++ header basics passed
+```
+
+The `tests/runtime-link` test uses `std::string`, `std::vector`, `std::sort`,
+and integral `std::to_chars` to check a small runtime-linked subset without
+using iostreams, locale, filesystem, exceptions, or RTTI-heavy paths:
+
+```sh
+cd ../runtime-link
+riscos-amu BUILD64=1
+riscos-build-run --64 aif64/CxxRuntime,ff8 --command CxxRuntime
+```
+
+The expected output is:
+
+```text
+libc++ runtime link passed
 ```

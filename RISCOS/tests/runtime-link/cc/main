@@ -1,0 +1,77 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Runtime-link smoke test for the RISC OS libc++ export
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <algorithm>
+#include <charconv>
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include <system_error>
+#include <vector>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_vector_sort()
+{
+    std::vector<int> values = {9, 4, 7, 1, 3};
+
+    std::sort(values.begin(), values.end());
+
+    return check(values.size() == 5, "vector size")
+        && check(values.front() == 1, "vector front")
+        && check(values.back() == 9, "vector back")
+        && check(std::is_sorted(values.begin(), values.end()), "vector sort");
+}
+
+bool test_string()
+{
+    std::string text = "lib";
+    text += "c++";
+    text.push_back('-');
+    text += "64";
+
+    return check(text == "libc++-64", "string contents")
+        && check(text.find("c++") == 3, "string find");
+}
+
+bool test_to_chars()
+{
+    char buffer[16] = {};
+    auto result = std::to_chars(buffer, buffer + sizeof(buffer), 12345);
+
+    return check(result.ec == std::errc(), "to_chars result")
+        && check(result.ptr != buffer, "to_chars pointer")
+        && check(static_cast<unsigned long>(result.ptr - buffer) == 5, "to_chars length")
+        && check(std::memcmp(buffer, "12345", 5) == 0, "to_chars contents");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_vector_sort() && ok;
+    ok = test_string() && ok;
+    ok = test_to_chars() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ runtime link passed");
+    return 0;
+}
