@@ -1,0 +1,156 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Fstream modes libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <fstream>
+#include <ios>
+#include <stdio.h>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool write_text(const char *path, const char *text)
+{
+    std::ofstream out(path, std::ios::out | std::ios::trunc);
+
+    if (!check(out.is_open(), "seed file open"))
+        return false;
+
+    out << text;
+    out.close();
+    return true;
+}
+
+bool read_text(const char *path, std::string &text)
+{
+    std::ifstream in(path);
+
+    if (!check(in.is_open(), "read file open"))
+        return false;
+
+    std::getline(in, text, '\0');
+    in.close();
+    return true;
+}
+
+bool test_trunc_mode()
+{
+    std::string text;
+
+    if (!write_text("fstream_mode_trunc", "stale"))
+        return false;
+
+    {
+        std::ofstream out("fstream_mode_trunc", std::ios::out | std::ios::trunc);
+
+        if (!check(out.is_open(), "trunc open"))
+            return false;
+
+        out << "A";
+    }
+
+    if (!read_text("fstream_mode_trunc", text))
+        return false;
+
+    return check(text == "A", "trunc contents");
+}
+
+bool test_in_out_mode()
+{
+    std::fstream io;
+    std::string text;
+
+    if (!write_text("fstream_mode_inout", "ABCDE"))
+        return false;
+
+    io.open("fstream_mode_inout", std::ios::in | std::ios::out);
+    if (!check(io.is_open(), "inout open"))
+        return false;
+
+    io.seekp(2, std::ios::beg);
+    io << 'Z';
+    io.flush();
+    io.clear();
+    io.seekg(0, std::ios::beg);
+    std::getline(io, text, '\0');
+    io.close();
+
+    return check(text == "ABZDE", "inout contents");
+}
+
+bool test_app_mode()
+{
+    std::fstream io;
+    std::string text;
+
+    if (!write_text("fstream_mode_app", "AB"))
+        return false;
+
+    io.open("fstream_mode_app", std::ios::in | std::ios::out | std::ios::app);
+    if (!check(io.is_open(), "app open"))
+        return false;
+
+    io << "CD";
+    io.close();
+
+    if (!read_text("fstream_mode_app", text))
+        return false;
+
+    return check(text == "ABCD", "app contents");
+}
+
+bool test_ate_mode()
+{
+    std::fstream io;
+    std::string text;
+
+    if (!write_text("fstream_mode_ate", "HI"))
+        return false;
+
+    io.open("fstream_mode_ate", std::ios::in | std::ios::out | std::ios::ate);
+    if (!check(io.is_open(), "ate open"))
+        return false;
+    if (!check(io.tellp() == std::streampos(2), "ate initial tellp"))
+        return false;
+
+    io.seekp(0, std::ios::beg);
+    io << 'Y';
+    io.flush();
+    io.clear();
+    io.seekg(0, std::ios::beg);
+    std::getline(io, text, '\0');
+    io.close();
+
+    return check(text == "YI", "ate contents");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_trunc_mode() && ok;
+    ok = test_in_out_mode() && ok;
+    ok = test_app_mode() && ok;
+    ok = test_ate_mode() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ fstream modes passed");
+    return 0;
+}

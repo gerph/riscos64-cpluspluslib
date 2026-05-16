@@ -79,4 +79,15 @@ The passing smoke tests are:
 - `tests/iostream-output-state`: fill, alignment, internal padding, width reset behaviour, `std::boolalpha`, and repeated precision/base changes on output streams.
 - `tests/iostream-recovery`: failed extraction, `failbit` handling, `clear()`-based recovery, and `unget()`/`putback()` character recovery.
 - `tests/iostream-text`: `std::quoted`, `std::ws`, `std::getline`, and delimiter-based text extraction.
+- `tests/iostream-manipulators`: `std::endl`, `std::flush`, `std::ends`, and `std::unitbuf` on narrow output streams and string buffers.
 - `tests/fstream-basics`: file creation, readback, append, and seek-based access with `std::ofstream`, `std::ifstream`, and `std::fstream`.
+- `tests/fstream-state`: missing-file failure, `failbit`/EOF handling, `clear()`, `close()`, and reopen cycles for narrow file streams.
+- `tests/fstream-binary`: binary-mode byte round-trips, embedded NUL data, and fixed-size read/write.
+- `tests/filebuf-basics`: direct `std::filebuf` open/read/write/seek coverage through the narrow stream buffer API.
+- `tests/filebuf-state`: direct `std::filebuf` failure, EOF, seek, and closed-buffer state coverage.
+- `tests/fstream-modes`: `out|trunc`, `in|out`, `in|out|app`, and `ate` mode behaviour and resulting file contents.
+
+Descriptor-backed file stream opens remain unsupported in the current port. The
+runtime shim in `cpp/riscos_iostream_support` provides `fdopen()` as a stub
+returning `nullptr`, so descriptor-based constructors and `open()` overloads
+are intentionally outside the supported smoke-test surface.

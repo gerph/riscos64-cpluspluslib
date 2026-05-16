@@ -26,7 +26,9 @@ The following areas have passing 64-bit smoke tests in the RISC OS build:
 - Narrow iostream support for `std::cout`, `std::cerr`, `std::cin`,
   `std::ostringstream`, `std::istringstream`, `std::stringstream`, simple
   string formatting, numeric formatted stream output, numeric formatted stream
-  input, and basic `std::ifstream`/`std::ofstream`/`std::fstream` file I/O.
+  input, common manipulators, direct `std::filebuf`, and narrow
+  `std::ifstream`/`std::ofstream`/`std::fstream` file I/O including binary
+  mode, stream state handling, and mode selection.
 
 ## Known limitations
 
@@ -41,6 +43,8 @@ The following areas have passing 64-bit smoke tests in the RISC OS build:
   configuration.
 - Locale-dependent facilities beyond the currently tested narrow iostream path
   should be treated as unsupported.
+- Descriptor-backed file stream opens are not supported in the current port
+  because the RISC OS runtime shim does not yet provide a working `fdopen`.
 
 ## RISC OS build and tests
 
