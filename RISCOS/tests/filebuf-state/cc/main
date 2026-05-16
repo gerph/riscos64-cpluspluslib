@@ -1,0 +1,90 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Filebuf state libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <cstdio>
+#include <fstream>
+#include <ios>
+#include <streambuf>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_filebuf_state()
+{
+    const char *path = "filebuf_state";
+    std::filebuf buffer;
+    char data[6] = {0, 0, 0, 0, 0, 0};
+    const std::streampos invalid = std::streampos(std::streamoff(-1));
+    const std::filebuf::traits_type::int_type eof =
+        std::filebuf::traits_type::eof();
+
+    if (!check(buffer.open("filebuf_missing", std::ios::in) == nullptr,
+               "filebuf missing open"))
+        return false;
+    if (!check(!buffer.is_open(), "filebuf missing is_open"))
+        return false;
+
+    if (buffer.open(path, std::ios::out | std::ios::trunc) == nullptr)
+        return check(false, "filebuf state write open");
+    if (!check(buffer.sputn("12345", 5) == 5, "filebuf state write"))
+        return false;
+    if (!check(buffer.pubseekpos(2, std::ios::out) == std::streampos(2),
+               "filebuf seek after write"))
+        return false;
+    if (!check(buffer.sputn("Z", 1) == 1, "filebuf overwrite after seek"))
+        return false;
+    if (!check(buffer.close() != nullptr, "filebuf close write"))
+        return false;
+
+    if (buffer.open(path, std::ios::in) == nullptr)
+        return check(false, "filebuf state read open");
+    if (!check(buffer.pubseekoff(0, std::ios::end, std::ios::in)
+               == std::streampos(5), "filebuf seek end"))
+        return false;
+    if (!check(buffer.sgetc() == eof, "filebuf eof at end"))
+        return false;
+    if (!check(buffer.pubseekpos(0, std::ios::in) == std::streampos(0),
+               "filebuf read after seek"))
+        return false;
+    if (!check(buffer.sgetn(data, 5) == 5, "filebuf state full read"))
+        return false;
+    data[5] = '\0';
+    if (!check(std::string(data) == "12Z45", "filebuf state contents"))
+        return false;
+    if (!check(buffer.sbumpc() == eof, "filebuf eof bump"))
+        return false;
+    if (!check(buffer.close() != nullptr, "filebuf close read"))
+        return false;
+    if (!check(!buffer.is_open(), "filebuf closed is_open"))
+        return false;
+    if (!check(buffer.pubseekoff(0, std::ios::beg, std::ios::in) == invalid,
+               "filebuf seek after close"))
+        return false;
+
+    return check(buffer.sgetc() == eof, "filebuf read after close");
+}
+
+} // namespace
+
+int main()
+{
+    if (!test_filebuf_state())
+        return 1;
+
+    std::puts("libc++ filebuf state passed");
+    return 0;
+}

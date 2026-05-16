@@ -1,0 +1,84 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Filebuf libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <cstdio>
+#include <fstream>
+#include <ios>
+#include <streambuf>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_filebuf_basics()
+{
+    const char *path = "filebuf_basic";
+    std::filebuf buffer;
+    char data[6] = {0, 0, 0, 0, 0, 0};
+    std::streampos position;
+
+    if (buffer.open(path, std::ios::out | std::ios::trunc) == nullptr)
+        return check(false, "filebuf write open");
+    if (!check(buffer.is_open(), "filebuf write is_open"))
+        return false;
+    if (!check(buffer.sputn("ABCDE", 5) == 5, "filebuf sputn"))
+        return false;
+    position = buffer.pubseekoff(2, std::ios::beg, std::ios::out);
+    if (!check(position == std::streampos(2), "filebuf pubseekoff"))
+        return false;
+    if (!check(buffer.sputn("xy", 2) == 2, "filebuf overwrite"))
+        return false;
+    if (!check(buffer.close() != nullptr, "filebuf close after write"))
+        return false;
+
+    if (buffer.open(path, std::ios::in) == nullptr)
+        return check(false, "filebuf read open");
+    if (!check(buffer.is_open(), "filebuf read is_open"))
+        return false;
+    if (!check(buffer.sgetc() == 'A', "filebuf sgetc"))
+        return false;
+    if (!check(buffer.sbumpc() == 'A', "filebuf sbumpc"))
+        return false;
+    if (!check(buffer.sgetn(data, 2) == 2, "filebuf sgetn prefix"))
+        return false;
+    if (!check(data[0] == 'B' && data[1] == 'x', "filebuf prefix data"))
+        return false;
+    position = buffer.pubseekpos(4, std::ios::in);
+    if (!check(position == std::streampos(4), "filebuf pubseekpos"))
+        return false;
+    if (!check(buffer.sgetc() == 'E', "filebuf seek read"))
+        return false;
+    position = buffer.pubseekoff(0, std::ios::beg, std::ios::in);
+    if (!check(position == std::streampos(0), "filebuf rewind"))
+        return false;
+    if (!check(buffer.sgetn(data, 5) == 5, "filebuf full read"))
+        return false;
+    data[5] = '\0';
+    if (!check(std::string(data) == "ABxyE", "filebuf final contents"))
+        return false;
+
+    return check(buffer.close() != nullptr, "filebuf close after read");
+}
+
+} // namespace
+
+int main()
+{
+    if (!test_filebuf_basics())
+        return 1;
+
+    std::puts("libc++ filebuf basics passed");
+    return 0;
+}
