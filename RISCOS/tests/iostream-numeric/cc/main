@@ -1,0 +1,49 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Iostream integral formatting libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <iomanip>
+#include <sstream>
+#include <stdio.h>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_integral_output()
+{
+    std::ostringstream out;
+
+    out << 42 << ' ' << std::showbase << std::hex << 255 << ' '
+        << std::showpos << std::dec << 7;
+
+    return check(out.str() == "42 0xff +7", "integral output")
+        && check(out.good(), "integral stream state");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_integral_output() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ iostream integral formatting passed");
+    return 0;
+}

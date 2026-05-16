@@ -8,6 +8,22 @@
 #include <climits>
 #include <locale.h>
 
+#ifdef isdigit_l
+#undef isdigit_l
+#endif
+
+#ifdef isxdigit_l
+#undef isxdigit_l
+#endif
+
+#ifdef islower_l
+#undef islower_l
+#endif
+
+#ifdef isupper_l
+#undef isupper_l
+#endif
+
 extern "C" {
 
 void* __dso_handle = &__dso_handle;
@@ -106,6 +122,26 @@ int toupper_l(int c, locale_t)
 int tolower_l(int c, locale_t)
 {
     return std::tolower(c);
+}
+
+int isdigit_l(int c, locale_t)
+{
+    return std::isdigit(c);
+}
+
+int isxdigit_l(int c, locale_t)
+{
+    return std::isxdigit(c);
+}
+
+int islower_l(int c, locale_t)
+{
+    return std::islower(c);
+}
+
+int isupper_l(int c, locale_t)
+{
+    return std::isupper(c);
 }
 
 float strtof_l(const char* nptr, char** endptr, locale_t)
