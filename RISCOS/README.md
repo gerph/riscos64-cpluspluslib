@@ -92,3 +92,18 @@ The expected output is:
 ```text
 libc++ memory basics passed
 ```
+
+The `tests/associative-basics` test exercises ordered and unordered containers
+with string keys:
+
+```sh
+cd ../associative-basics
+riscos-amu BUILD64=1
+riscos-build-run --64 aif64/CxxAssoc,ff8 --command CxxAssoc
+```
+
+The expected output is:
+
+```text
+libc++ associative basics passed
+```

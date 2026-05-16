@@ -1,0 +1,93 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Associative container smoke test for the RISC OS libc++ export
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <cstdio>
+#include <map>
+#include <set>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_ordered_map()
+{
+    std::map<std::string, int> counts;
+
+    counts["beta"] = 2;
+    counts["alpha"] = 1;
+    counts["gamma"] = 3;
+
+    auto first = counts.begin();
+
+    return check(counts.size() == 3, "map size")
+        && check(first != counts.end(), "map begin")
+        && check(first->first == "alpha", "map ordering")
+        && check(counts.find("gamma")->second == 3, "map find")
+        && check(counts.erase("beta") == 1, "map erase")
+        && check(counts.count("beta") == 0, "map count erased");
+}
+
+bool test_ordered_set()
+{
+    std::set<std::string_view> names;
+
+    names.insert("robuild");
+    names.insert("libc++");
+    names.insert("amu");
+    names.insert("libc++");
+
+    return check(names.size() == 3, "set unique size")
+        && check(*names.begin() == "amu", "set ordering")
+        && check(names.contains("robuild"), "set contains")
+        && check(!names.contains("missing"), "set missing");
+}
+
+bool test_unordered_map()
+{
+    std::unordered_map<std::string, int> values;
+
+    values.emplace("one", 1);
+    values.emplace("two", 2);
+    values["three"] = 3;
+
+    int sum = 0;
+    for (const auto& entry : values)
+        sum += entry.second;
+
+    return check(values.size() == 3, "unordered_map size")
+        && check(values.find("two") != values.end(), "unordered_map find")
+        && check(values["three"] == 3, "unordered_map lookup")
+        && check(sum == 6, "unordered_map iteration");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_ordered_map() && ok;
+    ok = test_ordered_set() && ok;
+    ok = test_unordered_map() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ associative basics passed");
+    return 0;
+}
