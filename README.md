@@ -25,8 +25,8 @@ The following areas have passing 64-bit smoke tests in the RISC OS build:
   `std::adjacent_difference`, `std::inner_product`, `std::gcd`, and `std::lcm`.
 - Narrow iostream support for `std::cout`, `std::cerr`, `std::cin`,
   `std::ostringstream`, `std::istringstream`, `std::stringstream`, simple
-  string formatting, numeric formatted stream output, and numeric formatted
-  stream input.
+  string formatting, numeric formatted stream output, numeric formatted stream
+  input, and basic `std::ifstream`/`std::ofstream`/`std::fstream` file I/O.
 
 ## Known limitations
 

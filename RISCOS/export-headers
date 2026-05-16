@@ -10,6 +10,7 @@ export_lib_native=$1
 library_component=$2
 source_dir="../include"
 destination="${export_lib_native}/${library_component}"
+legacy_destination="${export_lib_native}/${library_component}lib"
 
 mkdir -p "${destination}"
 for entry in "${destination}"/* "${destination}"/.[!.]* "${destination}"/..?*; do
@@ -42,3 +43,9 @@ done
 
 cd - >/dev/null
 cp __config_site "${destination}/__config_site"
+
+# Some toolchain transforms still resolve <fstream> through the legacy
+# c++lib/h/fstream path. Export a libc++ copy there so std::fstream sees
+# the same implementation as the extensionless header set.
+mkdir -p "${legacy_destination}/h"
+cp "${source_dir}/fstream" "${legacy_destination}/h/fstream"

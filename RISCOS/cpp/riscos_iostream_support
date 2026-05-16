@@ -172,4 +172,9 @@ int vasprintf(char** output, const char* format, va_list args)
     return std::vsnprintf(*output, static_cast<size_t>(length) + 1, format, args);
 }
 
+FILE* fdopen(int, const char*)
+{
+    return nullptr;
+}
+
 }

@@ -79,3 +79,4 @@ The passing smoke tests are:
 - `tests/iostream-output-state`: fill, alignment, internal padding, width reset behaviour, `std::boolalpha`, and repeated precision/base changes on output streams.
 - `tests/iostream-recovery`: failed extraction, `failbit` handling, `clear()`-based recovery, and `unget()`/`putback()` character recovery.
 - `tests/iostream-text`: `std::quoted`, `std::ws`, `std::getline`, and delimiter-based text extraction.
+- `tests/fstream-basics`: file creation, readback, append, and seek-based access with `std::ofstream`, `std::ifstream`, and `std::fstream`.

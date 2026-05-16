@@ -1,10 +1,10 @@
 // Explicit iostream instantiations needed by the RISC OS libc++ build.
 //
-// Upstream pulls <fstream> here, which in turn drags in <filesystem>.
-// This port keeps filesystem disabled, but still needs the core stream
-// classes for cout/cin/cerr.
+// This port keeps <filesystem> disabled, but still needs the core stream
+// classes, including the stdio-backed file stream types.
 
 #include <__config>
+#include <fstream>
 #include <ios>
 #include <istream>
 #include <ostream>
@@ -30,5 +30,8 @@ template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS basic_stringbuf<char>;
 template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS basic_stringstream<char>;
 template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS basic_ostringstream<char>;
 template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS basic_istringstream<char>;
+template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS basic_ifstream<char>;
+template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS basic_ofstream<char>;
+template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS basic_filebuf<char>;
 
 _LIBCPP_END_NAMESPACE_STD

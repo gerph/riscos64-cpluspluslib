@@ -1,0 +1,92 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Fstream libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <fstream>
+#include <ios>
+#include <stdio.h>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_write_and_read()
+{
+    const char *path = "fstream_test";
+    std::ofstream out;
+    std::ifstream in;
+    std::string first;
+    std::string second;
+
+    out.open(path, std::ios::out | std::ios::trunc);
+    if (!check(out.is_open(), "ofstream open"))
+        return false;
+
+    out << "first line\n";
+    out << "second line\n";
+    out.close();
+
+    in.open(path);
+    if (!check(in.is_open(), "ifstream open"))
+        return false;
+
+    std::getline(in, first);
+    std::getline(in, second);
+    in.close();
+
+    return check(first == "first line", "ifstream first line")
+        && check(second == "second line", "ifstream second line");
+}
+
+bool test_append_and_seek()
+{
+    const char *path = "fstream_test";
+    std::fstream io;
+    std::string all;
+    std::string tail;
+
+    io.open(path, std::ios::in | std::ios::out);
+    if (!check(io.is_open(), "fstream open"))
+        return false;
+
+    io.seekp(0, std::ios::end);
+    io << "tail\n";
+    io.flush();
+    io.clear();
+    io.seekg(0, std::ios::beg);
+    std::getline(io, all);
+    std::getline(io, tail);
+    std::getline(io, tail);
+    io.close();
+
+    return check(all == "first line", "fstream first line")
+        && check(tail == "tail", "fstream appended line");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_write_and_read() && ok;
+    ok = test_append_and_seek() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ fstream basics passed");
+    return 0;
+}
