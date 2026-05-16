@@ -1,0 +1,77 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Ranges smoke test for the RISC OS libc++ export
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <algorithm>
+#include <cstdio>
+#include <ranges>
+#include <string>
+#include <vector>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_ranges_sort_find()
+{
+    std::vector<int> values = {5, 1, 4, 2, 3};
+
+    std::ranges::sort(values);
+    auto found = std::ranges::find(values, 4);
+
+    return check(std::ranges::is_sorted(values), "ranges sort")
+        && check(found != values.end(), "ranges find")
+        && check(*found == 4, "ranges find value");
+}
+
+bool test_ranges_all_of()
+{
+    std::vector<std::string> words = {"alpha", "beta", "gamma"};
+    auto long_words = words | std::views::filter([](const std::string& word) { return word.size() >= 4; });
+
+    return check(std::ranges::all_of(long_words, [](const std::string& word) { return !word.empty(); }),
+                 "ranges all_of")
+        && check(std::ranges::count_if(words, [](const std::string& word) { return word.size() == 4; }) == 1,
+                 "ranges count_if");
+}
+
+bool test_ranges_copy_view()
+{
+    std::vector<int> source = {1, 2, 3, 4};
+    std::vector<int> destination(4);
+
+    auto result = std::ranges::copy(source | std::views::transform([](int value) { return value * 2; }),
+                                    destination.begin());
+
+    return check(result.out == destination.end(), "ranges copy output")
+        && check(destination[0] == 2, "ranges copy first")
+        && check(destination[3] == 8, "ranges copy last");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_ranges_sort_find() && ok;
+    ok = test_ranges_all_of() && ok;
+    ok = test_ranges_copy_view() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ ranges basics passed");
+    return 0;
+}

@@ -79,139 +79,23 @@ Build the library exports first:
 riscos-amu export
 ```
 
-Then build and run the header-only test:
+Then build and run a test from its directory with:
 
 ```sh
-cd tests/header-basics
+cd tests/<test-name>
 riscos-amu BUILD64=1
-riscos-build-run --64 aif64/CxxHeaders,ff8 --command CxxHeaders
+riscos-build-run --64 aif64/<component>,ff8 --command <component>
 ```
 
-The expected output is:
+The passing smoke tests are:
 
-```text
-libc++ header basics passed
-```
-
-The `tests/runtime-link` test uses `std::string`, `std::vector`, `std::sort`,
-and integral `std::to_chars` to check a small runtime-linked subset without
-using iostreams, locale, filesystem, exceptions, or RTTI-heavy paths:
-
-```sh
-cd ../runtime-link
-riscos-amu BUILD64=1
-riscos-build-run --64 aif64/CxxRuntime,ff8 --command CxxRuntime
-```
-
-The expected output is:
-
-```text
-libc++ runtime link passed
-```
-
-The `tests/memory-basics` test exercises `std::unique_ptr`, `std::shared_ptr`,
-`std::weak_ptr`, and smart pointers stored in `std::vector`:
-
-```sh
-cd ../memory-basics
-riscos-amu BUILD64=1
-riscos-build-run --64 aif64/CxxMemory,ff8 --command CxxMemory
-```
-
-The expected output is:
-
-```text
-libc++ memory basics passed
-```
-
-The `tests/associative-basics` test exercises ordered and unordered containers
-with string keys:
-
-```sh
-cd ../associative-basics
-riscos-amu BUILD64=1
-riscos-build-run --64 aif64/CxxAssoc,ff8 --command CxxAssoc
-```
-
-The expected output is:
-
-```text
-libc++ associative basics passed
-```
-
-The `tests/sequence-basics` test exercises `std::deque`, `std::list`, and
-`std::forward_list`:
-
-```sh
-cd ../sequence-basics
-riscos-amu BUILD64=1
-riscos-build-run --64 aif64/CxxSeq,ff8 --command CxxSeq
-```
-
-The expected output is:
-
-```text
-libc++ sequence basics passed
-```
-
-The `tests/charconv-basics` test exercises integer `std::to_chars` and
-`std::from_chars`, plus floating-point `std::to_chars`:
-
-```sh
-cd ../charconv-basics
-riscos-amu BUILD64=1
-riscos-build-run --64 aif64/CxxCharConv,ff8 --command CxxCharConv
-```
-
-The expected output is:
-
-```text
-libc++ charconv basics passed
-```
-
-The `tests/numeric-basics` test exercises `<numeric>` algorithms including
-`std::iota`, `std::accumulate`, `std::partial_sum`,
-`std::adjacent_difference`, `std::inner_product`, `std::gcd`, and `std::lcm`:
-
-```sh
-cd ../numeric-basics
-riscos-amu BUILD64=1
-riscos-build-run --64 aif64/CxxNumeric,ff8 --command CxxNumeric
-```
-
-The expected output is:
-
-```text
-libc++ numeric basics passed
-```
-
-The `tests/comparison-basics` test exercises three-way comparison, generated
-comparison operators, pairs, tuples, and lexicographical comparison helpers:
-
-```sh
-cd ../comparison-basics
-riscos-amu BUILD64=1
-riscos-build-run --64 aif64/CxxCompare,ff8 --command CxxCompare
-```
-
-The expected output is:
-
-```text
-libc++ comparison basics passed
-```
-
-The `tests/iterator-basics` test exercises iterator helpers such as
-`std::distance`, `std::next`, `std::prev`, `std::reverse_iterator`, and
-`std::iter_swap`:
-
-```sh
-cd ../iterator-basics
-riscos-amu BUILD64=1
-riscos-build-run --64 aif64/CxxIter,ff8 --command CxxIter
-```
-
-The expected output is:
-
-```text
-libc++ iterator basics passed
-```
+- `tests/header-basics`: exported header layout, `std::array`, `std::span`, `std::tuple`, `std::optional`, and basic algorithms.
+- `tests/runtime-link`: `std::string`, `std::vector`, `std::sort`, and integral `std::to_chars`.
+- `tests/memory-basics`: `std::unique_ptr`, `std::shared_ptr`, `std::weak_ptr`, and smart pointers stored in `std::vector`.
+- `tests/associative-basics`: ordered and unordered containers with string keys.
+- `tests/sequence-basics`: `std::deque`, `std::list`, and `std::forward_list`.
+- `tests/charconv-basics`: integer `std::to_chars` and `std::from_chars`, plus floating-point `std::to_chars`.
+- `tests/numeric-basics`: `std::iota`, `std::accumulate`, `std::partial_sum`, `std::adjacent_difference`, `std::inner_product`, `std::gcd`, and `std::lcm`.
+- `tests/comparison-basics`: three-way comparison, generated comparison operators, pairs, tuples, and lexicographical comparison helpers.
+- `tests/iterator-basics`: `std::distance`, `std::next`, `std::prev`, `std::reverse_iterator`, and `std::iter_swap`.
+- `tests/ranges-basics`: `std::ranges::sort`, `std::ranges::find`, `std::ranges::all_of`, `std::ranges::copy`, and simple `std::views` pipelines.
