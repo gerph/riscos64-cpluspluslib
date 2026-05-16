@@ -77,3 +77,4 @@ The passing smoke tests are:
 - `tests/iostream-numeric-input`: formatted integral, floating-point, and `std::boolalpha` extraction through `std::istringstream`.
 - `tests/iostream-state`: `std::skipws`, `std::noskipws`, width-limited extraction with `std::setw`, and repeated base switching on one input stream.
 - `tests/iostream-output-state`: fill, alignment, internal padding, width reset behaviour, `std::boolalpha`, and repeated precision/base changes on output streams.
+- `tests/iostream-recovery`: failed extraction, `failbit` handling, `clear()`-based recovery, and `unget()`/`putback()` character recovery.

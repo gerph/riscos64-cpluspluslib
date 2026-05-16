@@ -1,0 +1,90 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Iostream recovery libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <sstream>
+#include <stdio.h>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_failed_numeric_extraction()
+{
+    std::istringstream in("12 nope 34");
+    int first = 0;
+    int second = 0;
+
+    in >> first >> second;
+
+    return check(first == 12, "failed extraction first")
+        && check(in.fail(), "failed extraction failbit")
+        && check(!in.bad(), "failed extraction not bad");
+}
+
+bool test_clear_and_reposition()
+{
+    std::istringstream in("12 nope 34");
+    int first = 0;
+    int recovered = 0;
+    std::string word;
+
+    in >> first;
+    in >> recovered;
+    in.clear();
+    in >> word >> recovered;
+
+    return check(first == 12, "clear first")
+        && check(word == "nope", "clear skipped word")
+        && check(recovered == 34, "clear recovered value")
+        && check(in.good() || in.eof(), "clear stream state");
+}
+
+bool test_putback_and_unget()
+{
+    std::istringstream in("abc");
+    char a = '\0';
+    char b = '\0';
+    char c = '\0';
+
+    in.get(a);
+    in.get(b);
+    in.unget();
+    in.get(c);
+    in.putback(c);
+    in.get(c);
+
+    return check(a == 'a', "putback first")
+        && check(b == 'b', "putback second")
+        && check(c == 'b', "putback recovered")
+        && check(in.good(), "putback stream state");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_failed_numeric_extraction() && ok;
+    ok = test_clear_and_reposition() && ok;
+    ok = test_putback_and_unget() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ iostream recovery passed");
+    return 0;
+}
