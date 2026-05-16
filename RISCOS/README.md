@@ -99,3 +99,4 @@ The passing smoke tests are:
 - `tests/comparison-basics`: three-way comparison, generated comparison operators, pairs, tuples, and lexicographical comparison helpers.
 - `tests/iterator-basics`: `std::distance`, `std::next`, `std::prev`, `std::reverse_iterator`, and `std::iter_swap`.
 - `tests/ranges-basics`: `std::ranges::sort`, `std::ranges::find`, `std::ranges::all_of`, `std::ranges::copy`, and simple `std::views` pipelines.
+- `tests/algorithm-basics`: `std::sort`, `std::binary_search`, `std::lower_bound`, `std::upper_bound`, `std::remove_if`, `std::copy`, `std::reverse`, `std::rotate`, `std::for_each`, `std::accumulate`, and `std::minmax_element`.
