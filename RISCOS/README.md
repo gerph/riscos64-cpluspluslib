@@ -122,3 +122,18 @@ The expected output is:
 ```text
 libc++ sequence basics passed
 ```
+
+The `tests/charconv-basics` test exercises integer `std::to_chars` and
+`std::from_chars`, plus floating-point `std::to_chars`:
+
+```sh
+cd ../charconv-basics
+riscos-amu BUILD64=1
+riscos-build-run --64 aif64/CxxCharConv,ff8 --command CxxCharConv
+```
+
+The expected output is:
+
+```text
+libc++ charconv basics passed
+```

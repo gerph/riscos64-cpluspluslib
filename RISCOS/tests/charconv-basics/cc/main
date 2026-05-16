@@ -1,0 +1,72 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Character conversion smoke test for the RISC OS libc++ export
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <charconv>
+#include <cstdio>
+#include <cstring>
+#include <string_view>
+#include <system_error>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_integer_to_chars()
+{
+    char buffer[32] = {};
+    auto result = std::to_chars(buffer, buffer + sizeof(buffer), -123456);
+
+    return check(result.ec == std::errc(), "integer to_chars result")
+        && check(static_cast<unsigned long>(result.ptr - buffer) == 7, "integer to_chars length")
+        && check(std::memcmp(buffer, "-123456", 7) == 0, "integer to_chars contents");
+}
+
+bool test_integer_from_chars()
+{
+    int value = 0;
+    std::string_view input = "7890 rest";
+    auto result = std::from_chars(input.data(), input.data() + input.size(), value);
+
+    return check(result.ec == std::errc(), "integer from_chars result")
+        && check(value == 7890, "integer from_chars value")
+        && check(static_cast<unsigned long>(result.ptr - input.data()) == 4, "integer from_chars pointer");
+}
+
+bool test_floating_to_chars()
+{
+    char buffer[32] = {};
+    auto result = std::to_chars(buffer, buffer + sizeof(buffer), 12.5, std::chars_format::fixed, 2);
+
+    return check(result.ec == std::errc(), "floating to_chars result")
+        && check(static_cast<unsigned long>(result.ptr - buffer) == 5, "floating to_chars length")
+        && check(std::memcmp(buffer, "12.50", 5) == 0, "floating to_chars contents");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_integer_to_chars() && ok;
+    ok = test_integer_from_chars() && ok;
+    ok = test_floating_to_chars() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ charconv basics passed");
+    return 0;
+}
