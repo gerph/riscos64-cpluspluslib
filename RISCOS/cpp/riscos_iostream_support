@@ -1,0 +1,139 @@
+// RISC OS support shims for the libc++ narrow iostream subset.
+
+#include <cctype>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <locale.h>
+
+extern "C" {
+
+void* __dso_handle = &__dso_handle;
+
+int __cxa_guard_acquire(long long* guard_object)
+{
+    return *reinterpret_cast<unsigned char*>(guard_object) == 0;
+}
+
+void __cxa_guard_release(long long* guard_object)
+{
+    *reinterpret_cast<unsigned char*>(guard_object) = 1;
+}
+
+void __cxa_guard_abort(long long*)
+{
+}
+
+int __cxa_atexit(void (*)(void*), void*, void*)
+{
+    return 0;
+}
+
+void __cxa_pure_virtual(void)
+{
+    std::abort();
+}
+
+static struct lconv riscos_c_locale;
+static bool riscos_c_locale_initialised = false;
+
+static char riscos_locale_name[] = "C";
+static locale_t riscos_locale = reinterpret_cast<locale_t>(&riscos_c_locale);
+
+char* setlocale(int, const char*)
+{
+    return riscos_locale_name;
+}
+
+struct lconv* localeconv(void)
+{
+    if (!riscos_c_locale_initialised)
+    {
+        std::memset(&riscos_c_locale, 0, sizeof(riscos_c_locale));
+        riscos_c_locale.decimal_point = const_cast<char*>(".");
+        riscos_c_locale.thousands_sep = const_cast<char*>("");
+        riscos_c_locale.grouping = const_cast<char*>("");
+        riscos_c_locale.mon_decimal_point = const_cast<char*>(".");
+        riscos_c_locale.mon_thousands_sep = const_cast<char*>("");
+        riscos_c_locale.mon_grouping = const_cast<char*>("");
+        riscos_c_locale.positive_sign = const_cast<char*>("");
+        riscos_c_locale.negative_sign = const_cast<char*>("");
+        riscos_c_locale.int_frac_digits = CHAR_MAX;
+        riscos_c_locale.frac_digits = CHAR_MAX;
+        riscos_c_locale.p_cs_precedes = CHAR_MAX;
+        riscos_c_locale.p_sep_by_space = CHAR_MAX;
+        riscos_c_locale.n_cs_precedes = CHAR_MAX;
+        riscos_c_locale.n_sep_by_space = CHAR_MAX;
+        riscos_c_locale.p_sign_posn = CHAR_MAX;
+        riscos_c_locale.n_sign_posn = CHAR_MAX;
+        riscos_c_locale_initialised = true;
+    }
+
+    return &riscos_c_locale;
+}
+
+locale_t newlocale(int, const char*, locale_t)
+{
+    return riscos_locale;
+}
+
+void freelocale(locale_t)
+{
+}
+
+locale_t uselocale(locale_t)
+{
+    return riscos_locale;
+}
+
+int strcoll_l(const char* left, const char* right, locale_t)
+{
+    return std::strcoll(left, right);
+}
+
+size_t strxfrm_l(char* destination, const char* source, size_t size, locale_t)
+{
+    return std::strxfrm(destination, source, size);
+}
+
+int toupper_l(int c, locale_t)
+{
+    return std::toupper(c);
+}
+
+int tolower_l(int c, locale_t)
+{
+    return std::tolower(c);
+}
+
+float strtof_l(const char* nptr, char** endptr, locale_t)
+{
+    return std::strtof(nptr, endptr);
+}
+
+long double strtold_l(const char* nptr, char** endptr, locale_t)
+{
+    return std::strtold(nptr, endptr);
+}
+
+int vasprintf(char** output, const char* format, va_list args)
+{
+    va_list copy;
+    int length;
+
+    va_copy(copy, args);
+    length = std::vsnprintf(nullptr, 0, format, copy);
+    va_end(copy);
+    if (length < 0)
+        return -1;
+
+    *output = static_cast<char*>(std::malloc(static_cast<size_t>(length) + 1));
+    if (*output == nullptr)
+        return -1;
+
+    return std::vsnprintf(*output, static_cast<size_t>(length) + 1, format, args);
+}
+
+}

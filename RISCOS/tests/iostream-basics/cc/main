@@ -1,0 +1,61 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Iostream libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <iostream>
+#include <stdio.h>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_output_streams()
+{
+    std::cout << "cout ready";
+    std::cerr << "cerr ready";
+    std::cout << std::endl;
+    std::cerr << std::endl;
+    return check(std::cout.good(), "cout good")
+        && check(std::cerr.good(), "cerr good");
+}
+
+bool test_input_stream()
+{
+    std::string line;
+    char ch = '\0';
+
+    std::getline(std::cin, line);
+    std::cin.get(ch);
+
+    return check(line == "hello from cin", "getline")
+        && check(ch == 'Q', "cin get")
+        && check(std::cin.good() || std::cin.eof(), "cin state");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_output_streams() && ok;
+    ok = test_input_stream() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ iostream basics passed");
+    return 0;
+}

@@ -32,8 +32,8 @@ are `<Exports$Dir>.Lib.c++.o.libc++-64` and
 
 This source tree is LLVM libc++ 17.0.6, which still supports GCC 12. The RISC
 OS site configuration disables unavailable runtime features such as threads,
-filesystem, localisation, random-device support, wide-character support, and
-the parallel STL backend.
+filesystem, random-device support, wide-character support, and the parallel
+STL backend.
 
 ## Status
 
@@ -50,21 +50,22 @@ The following areas have passing 64-bit smoke tests:
   floating-point `std::to_chars`.
 - Numeric algorithms: `std::iota`, `std::accumulate`, `std::partial_sum`,
   `std::adjacent_difference`, `std::inner_product`, `std::gcd`, and `std::lcm`.
+- Narrow iostream support for `std::cout`, `std::cerr`, and `std::cin`.
 
 The following areas are known not to work, or are intentionally disabled in
 this port:
 
 - Exceptions and RTTI are not supported by the current test configuration; the
   library and runtime tests build with `-fno-exceptions -fno-rtti`.
-- Threads, monotonic clock support, filesystem, localisation, random-device
-  support, wide-character support, and the parallel STL backend are disabled in
+- Threads, monotonic clock support, filesystem, random-device support,
+  wide-character support, and the parallel STL backend are disabled in
   `__config_site`.
 - libc++ library aligned allocation is disabled because the RISC OS C library
   does not currently provide `aligned_alloc`.
 - Floating-point `std::from_chars` is not available in the current
   configuration.
-- Iostreams and locale-dependent facilities are not currently covered by
-  passing tests and should be treated as unsupported until tested.
+- Locale-dependent facilities beyond the narrow iostream path are not covered
+  by passing tests and should be treated as unsupported.
 
 ## Tests
 
@@ -104,3 +105,4 @@ The passing smoke tests are:
 - `tests/iterator-basics`: `std::distance`, `std::next`, `std::prev`, `std::reverse_iterator`, and `std::iter_swap`.
 - `tests/ranges-basics`: `std::ranges::sort`, `std::ranges::find`, `std::ranges::all_of`, `std::ranges::copy`, and simple `std::views` pipelines.
 - `tests/algorithm-basics`: `std::sort`, `std::binary_search`, `std::lower_bound`, `std::upper_bound`, `std::remove_if`, `std::copy`, `std::reverse`, `std::rotate`, `std::for_each`, `std::accumulate`, and `std::minmax_element`.
+- `tests/iostream-basics`: narrow `std::cout`, `std::cerr`, and `std::cin` support; this test expects `input,ffe` to contain `hello from cin` on the first line and `Q` on the second, and is run with `--command 'exec input,ffe' --command 'CxxIO'`.

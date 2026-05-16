@@ -22,6 +22,8 @@ CDEFINES   = -D_LIBCPP_BUILDING_LIBRARY \
              -std=gnu++23 \
              -fno-exceptions \
              -fno-rtti \
+             -fno-threadsafe-statics \
+             -fno-use-cxa-atexit \
              -nostdinc++ \
              -I../include \
              -I../src/include \
@@ -37,6 +39,9 @@ OBJS       = o.algorithm \
              o.condition_variable \
              o.condition_variable_destructor \
              o.exception \
+             o.ios \
+             o.iostream \
+             o.ios_instantiations \
              o.functional \
              o.future \
              o.hash \
@@ -51,6 +56,8 @@ OBJS       = o.algorithm \
              o.optional \
              o.print \
              o.random_shuffle \
+             o.locale \
+             o.riscos_iostream_support \
              o.ryu_d2fixed \
              o.ryu_d2s \
              o.ryu_f2s \
