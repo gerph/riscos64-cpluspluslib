@@ -1,0 +1,85 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Iostream text libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <iomanip>
+#include <sstream>
+#include <stdio.h>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_quoted_round_trip()
+{
+    std::ostringstream out;
+    std::istringstream in;
+    std::string encoded;
+    std::string decoded;
+
+    out << std::quoted("alpha beta");
+    encoded = out.str();
+    in.str(encoded);
+    in >> std::quoted(decoded);
+
+    return check(encoded == "\"alpha beta\"", "quoted encoded")
+        && check(decoded == "alpha beta", "quoted decoded");
+}
+
+bool test_ws_and_getline()
+{
+    std::istringstream in("   first line\nsecond");
+    std::string first;
+    std::string second;
+
+    std::getline(in >> std::ws, first);
+    std::getline(in, second);
+
+    return check(first == "first line", "ws first line")
+        && check(second == "second", "ws second line");
+}
+
+bool test_delimiter_extraction()
+{
+    std::istringstream in("one,two,three");
+    std::string first;
+    std::string second;
+    std::string third;
+
+    std::getline(in, first, ',');
+    std::getline(in, second, ',');
+    std::getline(in, third);
+
+    return check(first == "one", "delimiter first")
+        && check(second == "two", "delimiter second")
+        && check(third == "three", "delimiter third");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_quoted_round_trip() && ok;
+    ok = test_ws_and_getline() && ok;
+    ok = test_delimiter_extraction() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ iostream text passed");
+    return 0;
+}
