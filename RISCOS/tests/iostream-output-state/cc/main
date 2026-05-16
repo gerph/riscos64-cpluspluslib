@@ -1,0 +1,81 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Iostream output state libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <iomanip>
+#include <sstream>
+#include <stdio.h>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_alignment_and_fill()
+{
+    std::ostringstream out;
+
+    out << std::setfill('_')
+        << std::left << std::setw(5) << "xy"
+        << '|'
+        << std::right << std::setw(5) << "z"
+        << '|'
+        << std::internal << std::showpos << std::setw(5) << 7;
+
+    return check(out.str() == "xy___|____z|+___7", "alignment and fill")
+        && check(out.good(), "alignment stream state");
+}
+
+bool test_width_reset_and_boolalpha()
+{
+    std::ostringstream out;
+
+    out << std::setw(4) << 9
+        << ':'
+        << 3
+        << ' '
+        << std::boolalpha << true << ' ' << false;
+
+    return check(out.str() == "   9:3 true false", "width reset and boolalpha");
+}
+
+bool test_precision_and_showbase()
+{
+    std::ostringstream out;
+
+    out << std::fixed << std::setprecision(3) << 1.25
+        << ' '
+        << std::showbase << std::hex << 32
+        << ' '
+        << std::dec << std::setprecision(1) << 2.0;
+
+    return check(out.str() == "1.250 0x20 2.0", "precision and showbase");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_alignment_and_fill() && ok;
+    ok = test_width_reset_and_boolalpha() && ok;
+    ok = test_precision_and_showbase() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ iostream output state passed");
+    return 0;
+}
