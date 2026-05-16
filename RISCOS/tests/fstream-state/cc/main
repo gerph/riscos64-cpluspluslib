@@ -1,0 +1,134 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Fstream state libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <fstream>
+#include <ios>
+#include <stdio.h>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool write_seed_file(const char *path)
+{
+    std::ofstream out(path, std::ios::out | std::ios::trunc);
+
+    if (!check(out.is_open(), "seed open"))
+        return false;
+
+    out << "alpha\nbeta";
+    out.close();
+
+    return check(!out.is_open(), "seed close");
+}
+
+bool test_ifstream_state()
+{
+    const char *path = "fstream_state";
+    std::ifstream in;
+    std::string line;
+    std::string tail;
+
+    in.open("fstream_missing");
+    if (!check(!in.is_open(), "missing file is_open"))
+        return false;
+    if (!check(in.fail(), "missing file failbit"))
+        return false;
+
+    in.clear();
+    if (!check(!in.fail(), "clear missing failbit"))
+        return false;
+
+    in.open(path);
+    if (!check(in.is_open(), "reopen after failure"))
+        return false;
+
+    std::getline(in, line);
+    std::getline(in, tail);
+    if (!check(line == "alpha", "first line"))
+        return false;
+    if (!check(tail == "beta", "second line"))
+        return false;
+
+    line.clear();
+    std::getline(in, line);
+    if (!check(in.eof(), "eof after full read"))
+        return false;
+    if (!check(in.fail(), "failbit at eof"))
+        return false;
+
+    in.clear();
+    if (!check(!in.fail(), "clear eof failbit"))
+        return false;
+
+    in.close();
+    if (!check(!in.is_open(), "close after eof"))
+        return false;
+
+    in.open(path);
+    if (!check(in.is_open(), "open after close"))
+        return false;
+
+    in.close();
+    return check(!in.is_open(), "final close");
+}
+
+bool test_fstream_reopen_cycle()
+{
+    const char *path = "fstream_state_rw";
+    std::fstream io;
+    std::string text;
+
+    io.open(path, std::ios::out | std::ios::trunc);
+    if (!check(io.is_open(), "fstream initial open"))
+        return false;
+
+    io << "gamma";
+    io.close();
+
+    io.open("fstream_missing_rw", std::ios::in);
+    if (!check(!io.is_open(), "fstream missing open"))
+        return false;
+    if (!check(io.fail(), "fstream missing failbit"))
+        return false;
+
+    io.clear();
+    io.open(path, std::ios::in | std::ios::out);
+    if (!check(io.is_open(), "fstream reopen after failure"))
+        return false;
+
+    std::getline(io, text);
+    io.close();
+
+    return check(text == "gamma", "fstream reopened content");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = write_seed_file("fstream_state") && ok;
+    ok = test_ifstream_state() && ok;
+    ok = test_fstream_reopen_cycle() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ fstream state passed");
+    return 0;
+}

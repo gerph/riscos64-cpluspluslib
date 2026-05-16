@@ -1,0 +1,70 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Fstream binary libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <cstring>
+#include <fstream>
+#include <ios>
+#include <stdio.h>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_binary_round_trip()
+{
+    const char *path = "fstream_binary";
+    const unsigned char expected[] = {0x00, 0x41, 0x42, 0x00, 0x7f, 0xff, 0x10};
+    unsigned char actual[sizeof(expected)] = {0};
+    std::ofstream out;
+    std::ifstream in;
+
+    out.open(path, std::ios::out | std::ios::trunc | std::ios::binary);
+    if (!check(out.is_open(), "ofstream binary open"))
+        return false;
+
+    out.write(reinterpret_cast<const char*>(expected), sizeof(expected));
+    out.close();
+
+    in.open(path, std::ios::in | std::ios::binary);
+    if (!check(in.is_open(), "ifstream binary open"))
+        return false;
+
+    in.seekg(0, std::ios::end);
+    if (!check(in.tellg() == static_cast<std::streamoff>(sizeof(expected)),
+               "binary length"))
+        return false;
+
+    in.seekg(0, std::ios::beg);
+    in.read(reinterpret_cast<char*>(actual), sizeof(actual));
+    if (!check(in.gcount() == static_cast<std::streamsize>(sizeof(actual)),
+               "binary read length"))
+        return false;
+
+    in.close();
+
+    return check(std::memcmp(actual, expected, sizeof(expected)) == 0,
+                 "binary contents");
+}
+
+} // namespace
+
+int main()
+{
+    if (!test_binary_round_trip())
+        return 1;
+
+    std::puts("libc++ fstream binary passed");
+    return 0;
+}
