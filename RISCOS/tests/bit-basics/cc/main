@@ -1,0 +1,65 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Bit-helper libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <bit>
+#include <cstdio>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_counting_and_width()
+{
+    unsigned value = 0b10110100u;
+
+    return check(std::popcount(value) == 4, "popcount")
+        && check(std::countr_zero(value) == 2, "countr_zero")
+        && check(std::countl_zero(value) == (sizeof(unsigned) * 8 - 8), "countl_zero")
+        && check(std::bit_width(value) == 8, "bit_width");
+}
+
+bool test_power_helpers()
+{
+    return check(std::has_single_bit(8u), "has_single_bit")
+        && check(std::bit_floor(17u) == 16u, "bit_floor")
+        && check(std::bit_ceil(17u) == 32u, "bit_ceil");
+}
+
+bool test_rotations()
+{
+    unsigned char value = 0b10010001u;
+    auto left = std::rotl(value, 3);
+    auto right = std::rotr(value, 2);
+
+    return check(left == 0b10001100u, "rotl")
+        && check(right == 0b01100100u, "rotr");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_counting_and_width() && ok;
+    ok = test_power_helpers() && ok;
+    ok = test_rotations() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ bit basics passed");
+    return 0;
+}
