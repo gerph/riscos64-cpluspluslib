@@ -199,3 +199,19 @@ The expected output is:
 ```text
 libc++ comparison basics passed
 ```
+
+The `tests/iterator-basics` test exercises iterator helpers such as
+`std::distance`, `std::next`, `std::prev`, `std::reverse_iterator`, and
+`std::iter_swap`:
+
+```sh
+cd ../iterator-basics
+riscos-amu BUILD64=1
+riscos-build-run --64 aif64/CxxIter,ff8 --command CxxIter
+```
+
+The expected output is:
+
+```text
+libc++ iterator basics passed
+```

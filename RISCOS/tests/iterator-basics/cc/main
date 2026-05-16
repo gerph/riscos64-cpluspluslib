@@ -1,0 +1,73 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Iterator smoke test for the RISC OS libc++ export
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <algorithm>
+#include <array>
+#include <cstdio>
+#include <iterator>
+#include <vector>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_distance_and_advance()
+{
+    std::array<int, 5> values = {10, 20, 30, 40, 50};
+    auto first = values.begin();
+    auto last = values.end();
+
+    return check(std::distance(first, last) == 5, "distance")
+        && check(*std::next(first, 2) == 30, "next")
+        && check(*std::prev(last, 1) == 50, "prev");
+}
+
+bool test_reverse_iterator()
+{
+    std::vector<int> values = {1, 2, 3, 4};
+    std::reverse_iterator<std::vector<int>::iterator> rbegin(values.end());
+    std::reverse_iterator<std::vector<int>::iterator> rend(values.begin());
+
+    return check(*rbegin == 4, "reverse_iterator first")
+        && check(*std::next(rbegin) == 3, "reverse_iterator next")
+        && check(std::distance(rbegin, rend) == 4, "reverse_iterator distance");
+}
+
+bool test_iter_swap()
+{
+    std::array<int, 4> values = {1, 2, 3, 4};
+
+    std::iter_swap(values.begin(), std::next(values.begin(), 3));
+
+    return check(values[0] == 4, "iter_swap first")
+        && check(values[3] == 1, "iter_swap last");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_distance_and_advance() && ok;
+    ok = test_reverse_iterator() && ok;
+    ok = test_iter_swap() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ iterator basics passed");
+    return 0;
+}
