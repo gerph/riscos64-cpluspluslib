@@ -184,3 +184,18 @@ The expected output is:
 ```text
 libc++ numeric basics passed
 ```
+
+The `tests/comparison-basics` test exercises three-way comparison, generated
+comparison operators, pairs, tuples, and lexicographical comparison helpers:
+
+```sh
+cd ../comparison-basics
+riscos-amu BUILD64=1
+riscos-build-run --64 aif64/CxxCompare,ff8 --command CxxCompare
+```
+
+The expected output is:
+
+```text
+libc++ comparison basics passed
+```

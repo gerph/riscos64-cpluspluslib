@@ -1,0 +1,85 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Comparison smoke test for the RISC OS libc++ export
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <algorithm>
+#include <array>
+#include <compare>
+#include <cstdio>
+#include <string_view>
+#include <tuple>
+#include <utility>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+struct Version
+{
+    int major;
+    int minor;
+
+    friend auto operator<=>(const Version&, const Version&) = default;
+};
+
+bool test_spaceship()
+{
+    Version old_version{1, 9};
+    Version new_version{2, 0};
+    auto result = old_version <=> new_version;
+
+    return check(result < 0, "spaceship less")
+        && check(new_version > old_version, "spaceship generated greater")
+        && check(Version{2, 0} == new_version, "spaceship equality");
+}
+
+bool test_pair_tuple()
+{
+    std::pair<int, std::string_view> left{1, "alpha"};
+    std::pair<int, std::string_view> right{1, "beta"};
+    auto tuple = std::tuple{2, std::string_view("tuple"), true};
+
+    return check(left < right, "pair less")
+        && check(std::get<0>(tuple) == 2, "tuple first")
+        && check(std::get<1>(tuple) == "tuple", "tuple second")
+        && check(std::get<2>(tuple), "tuple third");
+}
+
+bool test_lexicographical_compare()
+{
+    std::array<int, 3> left = {1, 2, 3};
+    std::array<int, 3> right = {1, 3, 0};
+
+    return check(std::lexicographical_compare(left.begin(), left.end(), right.begin(), right.end()),
+                 "lexicographical_compare")
+        && check(std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end()) < 0,
+                 "lexicographical_compare_three_way");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_spaceship() && ok;
+    ok = test_pair_tuple() && ok;
+    ok = test_lexicographical_compare() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ comparison basics passed");
+    return 0;
+}
