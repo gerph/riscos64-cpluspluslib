@@ -1,0 +1,21 @@
+#!/usr/bin/env riscos-amu -f
+# Makefile for a small libc++ header/export smoke test.
+#
+
+COMPONENT = CxxHeaders
+
+BUILD64   = 1
+TYPE      = aif
+
+CDEFINES  = -std=gnu++23 \
+            -nostdinc++ \
+            -isystem C:c++
+
+LIBS      = ${CLIB} C:c++.o.libc++
+
+OBJS      = o.main
+
+include LibraryCommand
+
+#---------------------------------------------------------------------------
+# Dynamic dependencies:

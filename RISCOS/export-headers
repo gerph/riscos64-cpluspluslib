@@ -1,0 +1,44 @@
+#!/bin/sh
+set -eu
+
+if [ "$#" -ne 2 ]; then
+    echo "Usage: export-headers <export-lib-native> <library-component>" >&2
+    exit 1
+fi
+
+export_lib_native=$1
+library_component=$2
+source_dir="../include"
+destination="${export_lib_native}/${library_component}"
+
+mkdir -p "${destination}"
+for entry in "${destination}"/* "${destination}"/.[!.]* "${destination}"/..?*; do
+    [ -e "${entry}" ] || continue
+    [ "$(basename "${entry}")" = "o" ] && continue
+    rm -rf "${entry}"
+done
+
+cd "${source_dir}"
+
+find . -type f -name '*.h' -print | while IFS= read -r file; do
+    target=$(printf '%s\n' "${file}" | sed 's#^\./##;s#\.h$##')
+    target_dir=$(dirname "${target}")
+    target_file=$(basename "${target}")
+
+    if [ "${target_dir}" = "." ]; then
+        mkdir -p "${destination}/h"
+        cp "${file}" "${destination}/h/${target_file}"
+    else
+        mkdir -p "${destination}/${target_dir}/h"
+        cp "${file}" "${destination}/${target_dir}/h/${target_file}"
+    fi
+done
+
+find . -type f ! -name '*.h' -print | while IFS= read -r file; do
+    target=$(printf '%s\n' "${file}" | sed 's#^\./##')
+    mkdir -p "${destination}/$(dirname "${target}")"
+    cp "${file}" "${destination}/${target}"
+done
+
+cd - >/dev/null
+cp __config_site "${destination}/__config_site"

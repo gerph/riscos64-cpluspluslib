@@ -7,8 +7,10 @@ COMPONENT  = c++
 # This port is intended for the 64-bit GCC-based C++ toolchain.
 BUILD64    = 1
 
-# Export headers into <Exports$Dir>.Lib.c++.h and the library into
-# <Exports$Dir>.Lib.c++.o.
+# Export extensionless C++ headers in place below <Exports$Dir>.Lib.c++.
+# Files with a .h suffix are exported to a sibling h directory with the suffix
+# removed, matching the RISC OS include convention.
+# The library is exported into <Exports$Dir>.Lib.c++.o.
 LIBCOMPONENT = c++
 EXPORTHDRS   = ${EXP_LIB}.${LIBCOMPONENT}.h.__config
 
@@ -64,10 +66,7 @@ OBJS       = o.algorithm \
 include LibExport
 
 ${EXP_LIB}.${LIBCOMPONENT}.h.__config: ^.include.__config
-        rm -rf ${EXP_LIB_NATIVE}/${LIBCOMPONENT}/h
-        mkdir -p ${EXP_LIB_NATIVE}/${LIBCOMPONENT}
-        cp -a ../include ${EXP_LIB_NATIVE}/${LIBCOMPONENT}/h
-        cp __config_site ${EXP_LIB_NATIVE}/${LIBCOMPONENT}/h/__config_site
+        sh export-headers ${EXP_LIB_NATIVE} ${LIBCOMPONENT}
 
 #---------------------------------------------------------------------------
 # Dynamic dependencies:
