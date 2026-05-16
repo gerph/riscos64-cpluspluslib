@@ -1,0 +1,83 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Iostream numeric input libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <iomanip>
+#include <sstream>
+#include <stdio.h>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_integral_input()
+{
+    std::istringstream in("42 ff 17");
+    int decimal = 0;
+    int hexadecimal = 0;
+    int trailing = 0;
+
+    in >> decimal >> std::hex >> hexadecimal >> std::dec >> trailing;
+
+    return check(decimal == 42, "integral decimal")
+        && check(hexadecimal == 255, "integral hex")
+        && check(trailing == 17, "integral trailing")
+        && check(in.good() || in.eof(), "integral stream state");
+}
+
+bool test_floating_input()
+{
+    std::istringstream in("12.50 2.50e-01 -3.125");
+    double first = 0.0;
+    double second = 0.0;
+    double third = 0.0;
+
+    in >> first >> second >> third;
+
+    return check(first == 12.5, "floating first")
+        && check(second == 0.25, "floating second")
+        && check(third == -3.125, "floating third")
+        && check(in.good() || in.eof(), "floating stream state");
+}
+
+bool test_boolalpha_input()
+{
+    std::istringstream in("true false");
+    bool first = false;
+    bool second = true;
+
+    in >> std::boolalpha >> first >> second;
+
+    return check(first, "boolalpha first")
+        && check(!second, "boolalpha second")
+        && check(in.good() || in.eof(), "boolalpha stream state");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_integral_input() && ok;
+    ok = test_floating_input() && ok;
+    ok = test_boolalpha_input() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ iostream numeric input passed");
+    return 0;
+}
