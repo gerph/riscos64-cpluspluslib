@@ -1,0 +1,89 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Iostream stringstream libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <iomanip>
+#include <ios>
+#include <sstream>
+#include <stdio.h>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_output_formatting()
+{
+    std::ostringstream out;
+
+    out << std::setfill('_') << std::setw(6) << "xy";
+    out.write(":ok", 3);
+
+    return check(out.str() == "____xy:ok", "ostringstream formatting")
+        && check(out.good(), "ostringstream state");
+}
+
+bool test_input_formatting()
+{
+    std::istringstream in("alpha beta\nZ");
+    std::string left;
+    std::string right;
+    char ch = '\0';
+
+    std::getline(in, left, ' ');
+    std::getline(in, right);
+    in.get(ch);
+
+    return check(left == "alpha", "getline token")
+        && check(right == "beta", "getline line")
+        && check(ch == 'Z', "istream get")
+        && check(in.peek() < 0, "istringstream eof");
+}
+
+bool test_stringstream_reuse()
+{
+    std::stringstream io;
+    std::string first;
+    std::string second;
+
+    io.write("first\nsecond", 12);
+    io.seekg(0, std::ios::beg);
+    std::getline(io, first);
+    std::getline(io, second);
+    io.clear();
+    io.seekp(0, std::ios::end);
+    io.put('\n');
+    io << "third";
+
+    return check(first == "first", "stringstream first line")
+        && check(second == "second", "stringstream second line")
+        && check(io.str() == "first\nsecond\nthird", "stringstream reused");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_output_formatting() && ok;
+    ok = test_input_formatting() && ok;
+    ok = test_stringstream_reuse() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ iostream stringstream passed");
+    return 0;
+}

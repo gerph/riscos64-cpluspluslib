@@ -50,7 +50,7 @@ The following areas have passing 64-bit smoke tests:
   floating-point `std::to_chars`.
 - Numeric algorithms: `std::iota`, `std::accumulate`, `std::partial_sum`,
   `std::adjacent_difference`, `std::inner_product`, `std::gcd`, and `std::lcm`.
-- Narrow iostream support for `std::cout`, `std::cerr`, and `std::cin`.
+- Narrow iostream support for `std::cout`, `std::cerr`, `std::cin`, string streams, and simple string formatting.
 
 The following areas are known not to work, or are intentionally disabled in
 this port:
@@ -106,3 +106,4 @@ The passing smoke tests are:
 - `tests/ranges-basics`: `std::ranges::sort`, `std::ranges::find`, `std::ranges::all_of`, `std::ranges::copy`, and simple `std::views` pipelines.
 - `tests/algorithm-basics`: `std::sort`, `std::binary_search`, `std::lower_bound`, `std::upper_bound`, `std::remove_if`, `std::copy`, `std::reverse`, `std::rotate`, `std::for_each`, `std::accumulate`, and `std::minmax_element`.
 - `tests/iostream-basics`: narrow `std::cout`, `std::cerr`, and `std::cin` support; this test expects `input,ffe` to contain `hello from cin` on the first line and `Q` on the second, and is run with `--command 'exec input,ffe' --command 'CxxIO'`.
+- `tests/iostream-format`: `std::ostringstream`, `std::istringstream`, `std::stringstream`, stream positioning, unformatted read/write, and simple width/fill formatting on strings.
