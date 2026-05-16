@@ -1,0 +1,81 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Utility libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <cstdio>
+#include <optional>
+#include <tuple>
+#include <utility>
+#include <string_view>
+#include <variant>
+#include <type_traits>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_optional_and_exchange()
+{
+    std::optional<int> answer = 41;
+    int previous = std::exchange(*answer, 42);
+
+    return check(answer.has_value(), "optional has value")
+        && check(previous == 41, "exchange previous")
+        && check(*answer == 42, "exchange current");
+}
+
+bool test_pair_tuple_and_move()
+{
+    auto pair = std::pair{std::string_view{"left"}, 7};
+    auto tuple = std::make_tuple(pair.first, pair.second + 1);
+
+    auto moved = std::move(tuple);
+
+    return check(std::get<0>(moved) == "left", "pair and tuple string")
+        && check(std::get<1>(moved) == 8, "tuple integer");
+}
+
+bool test_variant_and_visit()
+{
+    std::variant<int, const char *> value = 7;
+
+    auto result = std::visit([](const auto &item) -> int {
+        if constexpr (std::is_same_v<std::decay_t<decltype(item)>, int>)
+            return item * 2;
+        return 0;
+    }, value);
+
+    value = "ok";
+    auto text = std::get<const char *>(value);
+
+    return check(result == 14, "variant visit")
+        && check(std::string_view{text} == "ok", "variant get");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_optional_and_exchange() && ok;
+    ok = test_pair_tuple_and_move() && ok;
+    ok = test_variant_and_visit() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ utility basics passed");
+    return 0;
+}
