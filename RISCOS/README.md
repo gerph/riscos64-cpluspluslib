@@ -77,3 +77,18 @@ The expected output is:
 ```text
 libc++ runtime link passed
 ```
+
+The `tests/memory-basics` test exercises `std::unique_ptr`, `std::shared_ptr`,
+`std::weak_ptr`, and smart pointers stored in `std::vector`:
+
+```sh
+cd ../memory-basics
+riscos-amu BUILD64=1
+riscos-build-run --64 aif64/CxxMemory,ff8 --command CxxMemory
+```
+
+The expected output is:
+
+```text
+libc++ memory basics passed
+```

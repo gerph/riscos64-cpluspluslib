@@ -1,0 +1,76 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Smart pointer smoke test for the RISC OS libc++ export
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <cstdio>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace {
+
+struct Record
+{
+    int id;
+    std::string name;
+};
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_unique_ptr()
+{
+    auto record = std::make_unique<Record>(Record{7, "unique"});
+    std::unique_ptr<Record> moved = std::move(record);
+
+    return check(record == nullptr, "unique_ptr moved source")
+        && check(moved != nullptr, "unique_ptr moved target")
+        && check(moved->id == 7, "unique_ptr value")
+        && check(moved->name == "unique", "unique_ptr string");
+}
+
+bool test_shared_ptr()
+{
+    auto record = std::make_shared<Record>(Record{11, "shared"});
+    std::weak_ptr<Record> weak = record;
+    std::vector<std::shared_ptr<Record>> records;
+
+    records.push_back(record);
+
+    bool ok = check(record.use_count() == 2, "shared_ptr count")
+        && check(!weak.expired(), "weak_ptr live")
+        && check(records[0]->id == 11, "shared_ptr value")
+        && check(records[0]->name == "shared", "shared_ptr string");
+
+    records.clear();
+    record.reset();
+
+    return ok && check(weak.expired(), "weak_ptr expired");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_unique_ptr() && ok;
+    ok = test_shared_ptr() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ memory basics passed");
+    return 0;
+}
