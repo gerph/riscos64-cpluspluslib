@@ -35,6 +35,37 @@ OS site configuration disables unavailable runtime features such as threads,
 filesystem, localisation, random-device support, wide-character support, and
 the parallel STL backend.
 
+## Status
+
+The following areas have passing 64-bit smoke tests:
+
+- Header export and inclusion through `-nostdinc++` and `-isystem C:c++`.
+- Basic algorithms, arrays, spans, tuples, optionals, and type traits.
+- Runtime linking for `std::string`, `std::vector`, `std::sort`, and integral
+  `std::to_chars`.
+- Smart pointers: `std::unique_ptr`, `std::shared_ptr`, and `std::weak_ptr`.
+- Sequence containers: `std::deque`, `std::list`, and `std::forward_list`.
+- Associative containers: `std::map`, `std::set`, and `std::unordered_map`.
+- Character conversion: integer `std::to_chars` and `std::from_chars`, plus
+  floating-point `std::to_chars`.
+- Numeric algorithms: `std::iota`, `std::accumulate`, `std::partial_sum`,
+  `std::adjacent_difference`, `std::inner_product`, `std::gcd`, and `std::lcm`.
+
+The following areas are known not to work, or are intentionally disabled in
+this port:
+
+- Exceptions and RTTI are not supported by the current test configuration; the
+  library and runtime tests build with `-fno-exceptions -fno-rtti`.
+- Threads, monotonic clock support, filesystem, localisation, random-device
+  support, wide-character support, and the parallel STL backend are disabled in
+  `__config_site`.
+- libc++ library aligned allocation is disabled because the RISC OS C library
+  does not currently provide `aligned_alloc`.
+- Floating-point `std::from_chars` is not available in the current
+  configuration.
+- Iostreams and locale-dependent facilities are not currently covered by
+  passing tests and should be treated as unsupported until tested.
+
 ## Tests
 
 Small 64-bit smoke tests are provided below `tests`. They build absolutes using
@@ -136,4 +167,20 @@ The expected output is:
 
 ```text
 libc++ charconv basics passed
+```
+
+The `tests/numeric-basics` test exercises `<numeric>` algorithms including
+`std::iota`, `std::accumulate`, `std::partial_sum`,
+`std::adjacent_difference`, `std::inner_product`, `std::gcd`, and `std::lcm`:
+
+```sh
+cd ../numeric-basics
+riscos-amu BUILD64=1
+riscos-build-run --64 aif64/CxxNumeric,ff8 --command CxxNumeric
+```
+
+The expected output is:
+
+```text
+libc++ numeric basics passed
 ```
