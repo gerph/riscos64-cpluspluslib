@@ -1,0 +1,63 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Chrono libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <chrono>
+#include <cstdio>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_duration_arithmetic()
+{
+    using namespace std::chrono;
+
+    seconds whole{3};
+    milliseconds part{250};
+    auto total = whole + duration_cast<seconds>(part);
+    auto elapsed = duration_cast<milliseconds>(whole) + part;
+
+    return check(total.count() == 3, "duration cast to seconds")
+        && check(elapsed.count() == 3250, "duration arithmetic");
+}
+
+bool test_time_point_conversion()
+{
+    using clock = std::chrono::system_clock;
+    using namespace std::chrono;
+
+    clock::time_point base{seconds{5}};
+    auto later = base + milliseconds{1250};
+    auto rounded = time_point_cast<seconds>(later);
+
+    return check(rounded.time_since_epoch().count() == 6, "time_point cast")
+        && check(duration_cast<milliseconds>(later - base).count() == 1250, "time_point delta");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_duration_arithmetic() && ok;
+    ok = test_time_point_conversion() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ chrono basics passed");
+    return 0;
+}
