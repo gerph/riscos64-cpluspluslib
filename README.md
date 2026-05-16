@@ -25,7 +25,7 @@ The following areas have passing 64-bit smoke tests in the RISC OS build:
   `std::adjacent_difference`, `std::inner_product`, `std::gcd`, and `std::lcm`.
 - Narrow iostream support for `std::cout`, `std::cerr`, `std::cin`,
   `std::ostringstream`, `std::istringstream`, `std::stringstream`, simple
-  string formatting, and integral formatted stream output.
+  string formatting, and numeric formatted stream output.
 
 ## Known limitations
 
@@ -38,8 +38,6 @@ The following areas have passing 64-bit smoke tests in the RISC OS build:
   does not currently provide `aligned_alloc`.
 - Floating-point `std::from_chars` is not available in the current
   configuration.
-- Floating-point formatted iostream output is not working yet; the current
-  locale-backed `num_put` path still aborts under RISC OS.
 - Locale-dependent facilities beyond the currently tested narrow iostream path
   should be treated as unsupported.
 

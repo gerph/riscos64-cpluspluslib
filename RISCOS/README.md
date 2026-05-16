@@ -73,4 +73,4 @@ The passing smoke tests are:
 - `tests/algorithm-basics`: `std::sort`, `std::binary_search`, `std::lower_bound`, `std::upper_bound`, `std::remove_if`, `std::copy`, `std::reverse`, `std::rotate`, `std::for_each`, `std::accumulate`, and `std::minmax_element`.
 - `tests/iostream-basics`: narrow `std::cout`, `std::cerr`, and `std::cin` support; this test expects `input,ffe` to contain `hello from cin` on the first line and `Q` on the second, and is run with `--command 'exec input,ffe' --command 'CxxIO'`.
 - `tests/iostream-format`: `std::ostringstream`, `std::istringstream`, `std::stringstream`, stream positioning, unformatted read/write, and simple width/fill formatting on strings.
-- `tests/iostream-numeric`: integral formatted stream output, including `std::hex`, `std::showbase`, and `std::showpos`.
+- `tests/iostream-numeric`: integral and floating-point formatted stream output, including `std::hex`, `std::showbase`, `std::showpos`, `std::fixed`, `std::scientific`, and `std::setprecision`.

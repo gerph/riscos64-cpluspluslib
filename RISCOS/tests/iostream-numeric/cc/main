@@ -1,6 +1,6 @@
 /*******************************************************************
  * File:        main
- * Purpose:     Iostream integral formatting libc++ smoke test for the RISC OS port
+ * Purpose:     Iostream numeric formatting libc++ smoke test for the RISC OS port
  * Author:      Gerph
  ******************************************************************/
 
@@ -33,6 +33,17 @@ bool test_integral_output()
         && check(out.good(), "integral stream state");
 }
 
+bool test_floating_output()
+{
+    std::ostringstream out;
+
+    out << std::fixed << std::setprecision(2) << 12.5 << ' '
+        << std::scientific << std::uppercase << 0.25;
+
+    return check(out.str() == "12.50 2.50E-01", "floating output")
+        && check(out.good(), "floating stream state");
+}
+
 } // namespace
 
 int main()
@@ -40,10 +51,11 @@ int main()
     bool ok = true;
 
     ok = test_integral_output() && ok;
+    ok = test_floating_output() && ok;
 
     if (!ok)
         return 1;
 
-    std::puts("libc++ iostream integral formatting passed");
+    std::puts("libc++ iostream numeric formatting passed");
     return 0;
 }

@@ -1220,13 +1220,13 @@ __num_put<_CharT>::__widen_and_group_float(char* __nb, char* __np, char* __ne,
         *__oe++ = __ct.widen(*__nf++);
         *__oe++ = __ct.widen(*__nf++);
         for (__ns = __nf; __ns < __ne; ++__ns)
-            if (!isxdigit_l(*__ns, _LIBCPP_GET_C_LOCALE))
+            if (!std::isxdigit(static_cast<unsigned char>(*__ns)))
                 break;
     }
     else
     {
         for (__ns = __nf; __ns < __ne; ++__ns)
-            if (!isdigit_l(*__ns, _LIBCPP_GET_C_LOCALE))
+            if (!std::isdigit(static_cast<unsigned char>(*__ns)))
                 break;
     }
     if (__grouping.empty())
