@@ -91,6 +91,7 @@ The passing smoke tests are:
 
 - `tests/header-basics`: exported header layout, `std::array`, `std::span`, `std::tuple`, `std::optional`, and basic algorithms.
 - `tests/runtime-link`: `std::string`, `std::vector`, `std::sort`, and integral `std::to_chars`.
+- `tests/string-basics`: `std::string`, `std::string_view`, `find`, `substr`, `append`, `replace`, `starts_with`, and `ends_with`.
 - `tests/memory-basics`: `std::unique_ptr`, `std::shared_ptr`, `std::weak_ptr`, and smart pointers stored in `std::vector`.
 - `tests/associative-basics`: ordered and unordered containers with string keys.
 - `tests/sequence-basics`: `std::deque`, `std::list`, and `std::forward_list`.

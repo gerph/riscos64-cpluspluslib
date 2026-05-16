@@ -1,0 +1,76 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     String libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <cstdio>
+#include <string>
+#include <string_view>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_basic_string_ops()
+{
+    std::string value = "lib";
+    value.append("c++");
+    value.insert(0, "open");
+    value.replace(value.find("++"), 2, "++");
+
+    return check(value == "openlibc++", "basic string ops")
+        && check(value.starts_with("open"), "starts_with")
+        && check(value.ends_with("c++"), "ends_with");
+}
+
+bool test_string_view_and_search()
+{
+    std::string text = "riscos libc++ string test";
+    std::string_view view(text);
+
+    auto pos = view.find("libc++");
+    auto sample = view.substr(pos, 6);
+
+    return check(pos != std::string_view::npos, "find")
+        && check(sample == "libc++", "substr")
+        && check(view.compare(pos, 6, "libc++") == 0, "compare");
+}
+
+bool test_resize_and_swap()
+{
+    std::string left = "abc";
+    std::string right = "xyz";
+
+    left.resize(5, '!');
+    left.swap(right);
+
+    return check(left == "xyz", "swap")
+        && check(right == "abc!!", "resize");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_basic_string_ops() && ok;
+    ok = test_string_view_and_search() && ok;
+    ok = test_resize_and_swap() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ string basics passed");
+    return 0;
+}
