@@ -1,0 +1,88 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Iostream state libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <iomanip>
+#include <sstream>
+#include <stdio.h>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_skipws_and_noskipws()
+{
+    std::istringstream in("  A B");
+    char first = '\0';
+    char second = '\0';
+    char third = '\0';
+
+    in >> first;
+    in >> std::noskipws >> second >> third;
+
+    return check(first == 'A', "skipws first")
+        && check(second == ' ', "noskipws second")
+        && check(third == 'B', "noskipws third");
+}
+
+bool test_width_limited_string_input()
+{
+    std::istringstream in("alphabet soup");
+    char buffer[5] = {0, 0, 0, 0, 0};
+    std::string tail;
+
+    in >> std::setw(5) >> buffer;
+    std::getline(in, tail);
+
+    return check(std::string(buffer) == "alph", "setw buffer")
+        && check(tail == "abet soup", "setw tail");
+}
+
+bool test_stateful_base_switching()
+{
+    std::istringstream in("10 ff 11 100");
+    int first = 0;
+    int second = 0;
+    int third = 0;
+    int fourth = 0;
+
+    in >> std::dec >> first;
+    in >> std::hex >> second;
+    in >> std::oct >> third;
+    in >> std::dec >> fourth;
+
+    return check(first == 10, "base first")
+        && check(second == 255, "base second")
+        && check(third == 9, "base third")
+        && check(fourth == 100, "base fourth")
+        && check(in.good() || in.eof(), "base stream state");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_skipws_and_noskipws() && ok;
+    ok = test_width_limited_string_input() && ok;
+    ok = test_stateful_base_switching() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ iostream state passed");
+    return 0;
+}
