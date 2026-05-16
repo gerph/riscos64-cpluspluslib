@@ -1,0 +1,90 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Sequence container smoke test for the RISC OS libc++ export
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <algorithm>
+#include <cstdio>
+#include <deque>
+#include <forward_list>
+#include <list>
+#include <numeric>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_deque()
+{
+    std::deque<int> values;
+
+    values.push_back(3);
+    values.push_front(1);
+    values.insert(values.begin() + 1, 2);
+    values.push_back(4);
+
+    return check(values.size() == 4, "deque size")
+        && check(values.front() == 1, "deque front")
+        && check(values.back() == 4, "deque back")
+        && check(std::accumulate(values.begin(), values.end(), 0) == 10, "deque accumulate");
+}
+
+bool test_list()
+{
+    std::list<std::string> words = {"beta", "alpha", "gamma"};
+
+    words.sort();
+    words.remove("beta");
+    words.push_back("omega");
+
+    return check(words.size() == 3, "list size")
+        && check(words.front() == "alpha", "list front")
+        && check(words.back() == "omega", "list back")
+        && check(std::find(words.begin(), words.end(), "gamma") != words.end(), "list find");
+}
+
+bool test_forward_list()
+{
+    std::forward_list<int> values = {4, 1, 3, 2};
+
+    values.sort();
+    values.remove_if([](int value) { return value % 2 == 0; });
+
+    auto first = values.begin();
+    auto second = first;
+    ++second;
+
+    return check(first != values.end(), "forward_list first")
+        && check(*first == 1, "forward_list first value")
+        && check(second != values.end(), "forward_list second")
+        && check(*second == 3, "forward_list second value")
+        && check(++second == values.end(), "forward_list length");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_deque() && ok;
+    ok = test_list() && ok;
+    ok = test_forward_list() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ sequence basics passed");
+    return 0;
+}

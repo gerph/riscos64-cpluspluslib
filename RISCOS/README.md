@@ -107,3 +107,18 @@ The expected output is:
 ```text
 libc++ associative basics passed
 ```
+
+The `tests/sequence-basics` test exercises `std::deque`, `std::list`, and
+`std::forward_list`:
+
+```sh
+cd ../sequence-basics
+riscos-amu BUILD64=1
+riscos-build-run --64 aif64/CxxSeq,ff8 --command CxxSeq
+```
+
+The expected output is:
+
+```text
+libc++ sequence basics passed
+```
