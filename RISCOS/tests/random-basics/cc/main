@@ -1,0 +1,48 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Random device libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <cstdio>
+#include <limits>
+#include <random>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_random_device()
+{
+    std::random_device default_device;
+    std::random_device named_device("CryptRandom");
+    unsigned first = default_device();
+    unsigned second = named_device();
+
+    return check(std::random_device::min() == 0u, "random_device min")
+        && check(std::random_device::max() == std::numeric_limits<unsigned>::max(),
+                 "random_device max")
+        && check(first >= std::random_device::min(), "random_device first range")
+        && check(second <= std::random_device::max(), "random_device second range")
+        && check(default_device.entropy() == 0.0, "random_device entropy");
+}
+
+} // namespace
+
+int main()
+{
+    if (!test_random_device())
+        return 1;
+
+    std::puts("libc++ random basics passed");
+    return 0;
+}

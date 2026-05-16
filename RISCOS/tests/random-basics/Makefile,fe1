@@ -1,0 +1,23 @@
+#!/usr/bin/env riscos-amu -f
+# Makefile for a small libc++ random_device smoke test.
+#
+
+COMPONENT = CxxRandom
+
+BUILD64   = 1
+TYPE      = aif
+
+CDEFINES  = -std=gnu++23 \
+            -fno-exceptions \
+            -fno-rtti \
+            -nostdinc++ \
+            -isystem C:c++
+
+OBJS      = o.main
+
+include LibraryCommand
+
+BUILD_LIBS = RO64C:o.libcrt C:c++.o.libc++-64
+
+#---------------------------------------------------------------------------
+# Dynamic dependencies:

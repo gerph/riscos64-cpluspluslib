@@ -20,6 +20,11 @@
 #include <__support/ibm/gettod_zos.h> // gettimeofdayMonotonic
 #endif
 
+extern "C" {
+#include "kernel.h"
+#include "swis.h"
+}
+
 #include <time.h>        // clock_gettime and CLOCK_{MONOTONIC,REALTIME,MONOTONIC_RAW}
 #include "include/apple_availability.h"
 
@@ -33,6 +38,10 @@
 
 #if defined(__APPLE__) || defined (__gnu_hurd__) || (defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0)
 # define _LIBCPP_HAS_CLOCK_GETTIME
+#endif
+
+#if defined(OS_ReadMonotonicTime)
+# undef _LIBCPP_HAS_CLOCK_GETTIME
 #endif
 
 #if defined(_LIBCPP_WIN32API)
@@ -60,6 +69,10 @@ _LIBCPP_BEGIN_NAMESPACE_STD
 
 namespace chrono
 {
+
+extern "C" int __cxa_guard_acquire(long long*);
+static void *volatile __runtime_anchor =
+    reinterpret_cast<void*>(&__cxa_guard_acquire);
 
 //
 // system_clock
@@ -114,6 +127,13 @@ static system_clock::time_point __libcpp_system_clock_now() {
   filetime_duration d{(static_cast<__int64>(ft.dwHighDateTime) << 32) |
                        static_cast<__int64>(ft.dwLowDateTime)};
   return system_clock::time_point(duration_cast<system_clock::duration>(d - nt_to_unix_epoch));
+}
+
+#elif defined(OS_ReadMonotonicTime)
+
+static system_clock::time_point __libcpp_system_clock_now() {
+    time_t now = time(nullptr);
+    return system_clock::time_point(seconds(now));
 }
 
 #elif defined(_LIBCPP_HAS_CLOCK_GETTIME)
@@ -224,6 +244,30 @@ static steady_clock::time_point __libcpp_steady_clock_now() noexcept {
 #    pragma comment(lib, "zircon")
 
   return steady_clock::time_point(nanoseconds(_zx_clock_get_monotonic()));
+}
+
+#  elif defined(OS_ReadMonotonicTime)
+
+static steady_clock::time_point __libcpp_steady_clock_now() {
+    _kernel_swi_regs regs = {};
+    _kernel_oserror *error = _kernel_swi(OS_ReadMonotonicTime, &regs, &regs);
+    static uint32_t previous_ticks = 0;
+    static uint64_t wrap_count = 0;
+    uint32_t current_ticks;
+    uint64_t total_ticks;
+
+    if (error != nullptr)
+        __throw_system_error(EIO, "OS_ReadMonotonicTime failed");
+
+    (void)__runtime_anchor;
+
+    current_ticks = static_cast<uint32_t>(regs.r[0]);
+    if (current_ticks < previous_ticks)
+        wrap_count += 1ull << 32;
+    previous_ticks = current_ticks;
+    total_ticks = wrap_count + current_ticks;
+
+    return steady_clock::time_point(milliseconds(total_ticks * 10));
 }
 
 #  elif defined(_LIBCPP_HAS_CLOCK_GETTIME)

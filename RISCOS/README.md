@@ -61,11 +61,13 @@ The passing smoke tests are:
 - `tests/string-basics`: `std::string`, `std::string_view`, `find`, `substr`, `append`, `replace`, `starts_with`, and `ends_with`.
 - `tests/utility-basics`: `std::optional`, `std::pair`, `std::tuple`, `std::exchange`, `std::move`, and `std::variant`.
 - `tests/chrono-basics`: `std::chrono::duration`, `std::chrono::time_point`, and `duration_cast`/`time_point_cast` arithmetic.
+- `tests/chrono-steady`: `std::chrono::steady_clock` monotonicity and basic progress using `OS_ReadMonotonicTime`.
 - `tests/bit-basics`: `std::popcount`, `std::countr_zero`, `std::countl_zero`, `std::bit_width`, `std::has_single_bit`, `std::bit_floor`, `std::bit_ceil`, `std::rotl`, and `std::rotr`.
 - `tests/memory-basics`: `std::unique_ptr`, `std::shared_ptr`, `std::weak_ptr`, and smart pointers stored in `std::vector`.
 - `tests/associative-basics`: ordered and unordered containers with string keys.
 - `tests/sequence-basics`: `std::deque`, `std::list`, and `std::forward_list`.
 - `tests/charconv-basics`: integer `std::to_chars` and `std::from_chars`, plus floating-point `std::to_chars`.
+- `tests/random-basics`: `std::random_device` construction and random-word generation through `CryptRandom`.
 - `tests/numeric-basics`: `std::iota`, `std::accumulate`, `std::partial_sum`, `std::adjacent_difference`, `std::inner_product`, `std::gcd`, and `std::lcm`.
 - `tests/comparison-basics`: three-way comparison, generated comparison operators, pairs, tuples, and lexicographical comparison helpers.
 - `tests/iterator-basics`: `std::distance`, `std::next`, `std::prev`, `std::reverse_iterator`, and `std::iter_swap`.

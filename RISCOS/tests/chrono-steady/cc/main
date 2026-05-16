@@ -1,0 +1,51 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Steady clock libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <chrono>
+#include <cstdio>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+bool test_steady_clock_progress()
+{
+    using clock = std::chrono::steady_clock;
+
+    clock::time_point start = clock::now();
+    clock::time_point later = start;
+    unsigned long spins = 0;
+
+    while (later == start && spins < 5000000)
+    {
+        ++spins;
+        later = clock::now();
+    }
+
+    return check(clock::is_steady, "steady_clock is_steady")
+        && check(later >= start, "steady_clock monotonic")
+        && check(later != start, "steady_clock progressed");
+}
+
+} // namespace
+
+int main()
+{
+    if (!test_steady_clock_progress())
+        return 1;
+
+    std::puts("libc++ chrono steady passed");
+    return 0;
+}

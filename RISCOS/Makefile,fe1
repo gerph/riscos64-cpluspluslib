@@ -55,6 +55,7 @@ OBJS       = o.algorithm \
              o.new \
              o.optional \
              o.print \
+             o.random \
              o.random_shuffle \
              o.locale \
              o.riscos_iostream_support \

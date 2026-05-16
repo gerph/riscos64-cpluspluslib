@@ -1,0 +1,89 @@
+//===----------------------------------------------------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+
+#include <__config>
+
+#include <__system_error/system_error.h>
+#include <limits>
+#include <random>
+
+#include <errno.h>
+#include <string.h>
+
+extern "C" {
+#include "kernel.h"
+}
+
+namespace {
+
+extern "C" int __cxa_guard_acquire(long long*);
+static void *volatile __runtime_anchor =
+    reinterpret_cast<void*>(&__cxa_guard_acquire);
+
+enum {
+    CryptRandom_Stir = 0x00051981,
+    CryptRandom_Word = 0x00051984
+};
+
+bool token_supported(const std::string &token)
+{
+    return token == "/dev/urandom" || token == "CryptRandom";
+}
+
+void validate_cryptrandom_available()
+{
+    _kernel_swi_regs regs = {};
+    _kernel_oserror *error = _kernel_swi(CryptRandom_Stir, &regs, &regs);
+
+    (void)__runtime_anchor;
+
+    if (error != nullptr)
+        std::__throw_system_error(ENODEV, error->errmess);
+}
+
+} // namespace
+
+_LIBCPP_BEGIN_NAMESPACE_STD
+
+#if defined(_LIBCPP_USING_RISCOS_RANDOM)
+
+random_device::random_device(const string& __token)
+{
+    if (!token_supported(__token))
+        __throw_system_error(ENOENT, ("random device not supported " + __token).c_str());
+
+    validate_cryptrandom_available();
+}
+
+random_device::~random_device()
+{
+}
+
+unsigned
+random_device::operator()()
+{
+    _kernel_swi_regs regs = {};
+    _kernel_oserror *error = _kernel_swi(CryptRandom_Word, &regs, &regs);
+
+    if (error != nullptr)
+        __throw_system_error(EIO, error->errmess);
+
+    return static_cast<unsigned>(regs.r[0]);
+}
+
+#else
+#error "RISC OS random support requires _LIBCPP_USING_RISCOS_RANDOM"
+#endif
+
+double
+random_device::entropy() const noexcept
+{
+    return 0;
+}
+
+_LIBCPP_END_NAMESPACE_STD

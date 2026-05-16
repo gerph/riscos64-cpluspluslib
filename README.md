@@ -23,6 +23,8 @@ The following areas have passing 64-bit smoke tests in the RISC OS build:
   floating-point `std::to_chars`.
 - Numeric algorithms: `std::iota`, `std::accumulate`, `std::partial_sum`,
   `std::adjacent_difference`, `std::inner_product`, `std::gcd`, and `std::lcm`.
+- `std::random_device` using the RISC OS `CryptRandom` SWI path.
+- Chrono durations, time points, and `std::chrono::steady_clock`.
 - Narrow iostream support for `std::cout`, `std::cerr`, `std::cin`,
   `std::ostringstream`, `std::istringstream`, `std::stringstream`, simple
   string formatting, numeric formatted stream output, numeric formatted stream
@@ -34,9 +36,8 @@ The following areas have passing 64-bit smoke tests in the RISC OS build:
 
 - Exceptions and RTTI are not supported by the current test configuration; the
   library and runtime tests build with `-fno-exceptions -fno-rtti`.
-- Threads, monotonic clock support, filesystem, random-device support,
-  wide-character support, and the parallel STL backend are disabled in
-  `RISCOS/__config_site`.
+- Threads, filesystem, wide-character support, and the parallel STL backend
+  are disabled in `RISCOS/__config_site`.
 - libc++ library aligned allocation is disabled because the RISC OS C library
   does not currently provide `aligned_alloc`.
 - Floating-point `std::from_chars` is not available in the current
