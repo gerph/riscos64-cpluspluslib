@@ -172,6 +172,16 @@ int vasprintf(char** output, const char* format, va_list args)
     return std::vsnprintf(*output, static_cast<size_t>(length) + 1, format, args);
 }
 
+int fseeko(FILE* stream, off_t offset, int whence)
+{
+    return std::fseek(stream, static_cast<long>(offset), whence);
+}
+
+off_t ftello(FILE* stream)
+{
+    return static_cast<off_t>(std::ftell(stream));
+}
+
 FILE* fdopen(int, const char*)
 {
     return nullptr;

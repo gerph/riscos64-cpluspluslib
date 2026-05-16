@@ -1,0 +1,88 @@
+/*******************************************************************
+ * File:        main
+ * Purpose:     Iostream manipulator libc++ smoke test for the RISC OS port
+ * Author:      Gerph
+ ******************************************************************/
+
+#include <ios>
+#include <ostream>
+#include <sstream>
+#include <stdio.h>
+#include <string>
+
+namespace {
+
+bool check(bool condition, const char *message)
+{
+    if (!condition)
+    {
+        std::printf("FAIL: %s\n", message);
+        return false;
+    }
+
+    return true;
+}
+
+class CountingBuffer : public std::stringbuf
+{
+public:
+    int sync_count = 0;
+
+protected:
+    int sync() override
+    {
+        ++sync_count;
+        return std::stringbuf::sync();
+    }
+};
+
+bool test_endl_and_ends()
+{
+    std::ostringstream out;
+    std::string text;
+
+    out << "alpha" << std::endl << "beta" << std::ends;
+    text = out.str();
+
+    return check(text.size() == 11, "manip string size")
+        && check(text[5] == '\n', "endl newline")
+        && check(text[10] == '\0', "ends terminator");
+}
+
+bool test_flush_and_unitbuf()
+{
+    CountingBuffer buffer;
+    std::ostream out(&buffer);
+
+    out << "A" << std::flush;
+    if (!check(buffer.sync_count >= 1, "flush sync"))
+        return false;
+
+    out << std::unitbuf;
+    if (!check((out.flags() & std::ios::unitbuf) != 0, "unitbuf flag set"))
+        return false;
+
+    const int after_flag = buffer.sync_count;
+    out << "BC";
+    if (!check(buffer.sync_count > after_flag, "unitbuf sync"))
+        return false;
+
+    out << std::nounitbuf;
+    return check((out.flags() & std::ios::unitbuf) == 0, "unitbuf flag clear");
+}
+
+} // namespace
+
+int main()
+{
+    bool ok = true;
+
+    ok = test_endl_and_ends() && ok;
+    ok = test_flush_and_unitbuf() && ok;
+
+    if (!ok)
+        return 1;
+
+    std::puts("libc++ iostream manipulators passed");
+    return 0;
+}
